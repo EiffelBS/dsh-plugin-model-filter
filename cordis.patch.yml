@@ -1,0 +1,21 @@
+# dsh-plugin-model-filter bundle patch, applied as a profile layer after
+# dsh-web-app in `dsh.profile.bundles` order (see `dsh plugin` reconciliation).
+#
+# Two edits:
+#  1. Disable the shipped `ui-model-selection` row. No `name` is given on
+#     purpose: the patch entry applies as an id-targeted override
+#     (applyEntryPatches applies every non-id key verbatim), so it survives the
+#     package-name check and only flips `disabled: true`. The official package
+#     then drops out of the client module graph entirely — it never registers
+#     the `/model` command, the `modelDirectories` service, or its seat, so
+#     this bundle can own all three without duplicate-contribution conflicts.
+#  2. Insert this package's own client row (`dsh-plugin-model-filter`). The
+#     node half of dsh-client-modules scans it, resolves the package by name,
+#     reads the `dsh.client` declaration, and serves `exports["./client"]`
+#     (lib/client.js), which registers the composer model seat with search.
+- id: ui-model-selection
+  disabled: true
+
+- insert:
+    - id: ui-model-filter
+      name: 'dsh-plugin-model-filter'
