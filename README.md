@@ -54,10 +54,13 @@ browser registers the search-enabled `ModelSelect` on the slot.
 ### Slot ownership
 
 `conversation.input.model` is a `kind: "single"`, session-scope slot. The stock
-`ui-model-selection` row and this bundle's row both register the seat; the row
-activated last wins the election, and this bundle's row is inserted **after**
-all shipped rows, so the searchable picker renders. When this bundle is
-disabled or removed, the stock picker (no search) takes over automatically.
+`ui-model-selection` row and this bundle's row both register the seat, but the
+native slot registry renders the entry with the **lowest priority** (its own
+error text: *"register at a different priority to shadow it (lowest
+renders)"*). The stock row registers at the default priority `0`; this bundle
+registers at `priority: -1`, so the searchable picker renders while the stock
+row stays live. When this bundle is disabled or removed, the stock picker (no
+search) takes over automatically.
 
 ### Rendered vs. owned responsibilities
 
@@ -139,9 +142,11 @@ lib/client.js         browser half: search filter, ModelSelect on the slot
 ## Under the hood
 
 - The picker occupies the public slot `conversation.input.model`
-  (`kind: "single"`, session scope). This bundle's row is activated after the
-  stock row's, so its registration wins the single-slot election while the
-  stock package keeps providing the service, command, and dictionary keys.
+  (`kind: "single"`, session scope). This bundle registers it at
+  `priority: -1` while the stock row stays at `0`, and the registry renders the
+  lowest-priority entry — so the searchable picker wins the single-slot
+  election while the stock package keeps providing the service, command, and
+  dictionary keys.
 - Removing this bundle cannot starve `modelDirectories`: the provider is the
   stock row, not this bundle. This fixes the boot failure seen in the
   first-generation design, where disabling the plugin row left
