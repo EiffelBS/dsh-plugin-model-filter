@@ -5,6 +5,8 @@ the DSH chat composer. With many providers and models in your catalog, the
 default menu is a long grouped list; this plugin lets you type to filter it
 instantly (`Search models…`) without touching the rest of the selection UX.
 
+![Searchable model menu](assets/screenshot-model-menu.png)
+
 It is the properly-named, distributable successor to the earlier profile-local
 name-shadowing fork (`@deepseek-ai/dsh-client-ui-model-selection` vendored copy).
 Instead of shadowing the shipped package name, this plugin is a real
