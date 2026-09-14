@@ -9,19 +9,42 @@ instantly (`Search models…`) without touching the rest of the selection UX.
 
 ## Search syntax
 
-The filter box supports two modes:
+The filter box supports two modes: plain text and regular expressions.
 
-- **Plain text** — a case-insensitive substring match, exactly as before
-  (e.g. `deepseek v4`).
-- **Regular expression** — wrap the pattern in slashes:
-  `/deepseek-v4/` (any match), `/^gpt/i` (anchored, case-insensitive),
-  `/\d+/` (digit names). Flags `i`, `m`, `s`, `u` are honored; `g`/`y` are
-  ignored to keep the matcher stateless. The pattern applies to the model
-  name, model id, provider name, and provider id. An invalid pattern shows
-  a short "Invalid pattern" hint instead of matching nothing silently.
-  Text that merely contains slashes (e.g. a model id like
-  `deepseek-official/deepseek-v4`) still searches as plain text — only a
-  leading `/…/` pair selects the regex mode.
+### Plain text
+
+A case-insensitive substring match, exactly as before (e.g. `deepseek v4`).
+Text that merely contains slashes (e.g. a model id like
+`deepseek-official/deepseek-v4`) still searches as plain text.
+
+### Regex
+
+Wrap a pattern in slashes to switch to a regular expression: `/pattern/`,
+optionally followed by flags: `/pattern/i`. The pattern applies to the model
+name, model id, provider name, and provider id; an invalid pattern
+(e.g. `/[/`) shows a short "Invalid pattern" hint instead of silently
+matching nothing.
+
+Flags `i`, `m`, `s`, `u` are honored; `g`/`y` are ignored to keep the
+matcher stateless.
+
+**Examples** (with a typical catalog):
+
+| Filter | Matches |
+| --- | --- |
+| `/^gpt/i` | models whose name starts with "gpt", any case (`GPT-4o`, `GPT-4o mini`, `GPT-4 Turbo`) |
+| `/pro\|flash/` | models containing "pro" **or** "flash" (`deepseek-v4-pro`, `deepseek-v4-flash`) |
+| `/(v4\|turbo)/` | "v4" or "turbo" anywhere (`deepseek-v4-pro`, `deepseek-v4-flash`, `GPT-4 Turbo`) |
+| `/mini$/` | models ending with "mini" (`GPT-4o mini`) |
+| `/\d+$/` | models ending with a digit (`deepseek-r1`) |
+| `/\d\.\d/` | version numbers like "x.y" (`Claude 3.5 Sonnet` for 3.5) |
+| `/^claude/i` | the whole Anthropic provider group (pattern also tests provider name/id) |
+| `/\bro\b/` | "ro" as a whole word (matches little — "pro" has no word boundary before "ro") |
+
+> Regex basics: `^`/`$` anchor start/end, `|` means "or", `\d`/`\w` are
+> character classes, `\.` escapes a literal dot, `\b` is a word boundary,
+> `(...)` groups alternatives. A literal `/` inside a pattern must be
+> escaped as `\/`.
 
 It is the properly-named, distributable successor to the earlier profile-local
 name-shadowing fork (`@deepseek-ai/dsh-client-ui-model-selection` vendored copy).
