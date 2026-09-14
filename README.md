@@ -25,8 +25,11 @@ name, model id, provider name, and provider id; an invalid pattern
 (e.g. `/[/`) shows a short "Invalid pattern" hint instead of silently
 matching nothing.
 
-As soon as the input starts with a `/`, a small **`regex` badge** appears next
-to the field to signal that the filter switched to regular-expression mode.
+As soon as the input starts with a `/`, a small **`regex` badge** appears at
+the right end of the field: gray while the pattern is incomplete, **green**
+once it is a valid regular expression, red when it fails to compile.
+
+![Regex filter /^deep.*flash/ with the green validity badge](assets/screenshot-regex-filter.png)
 
 Flags `i`, `m`, `s`, `u` are honored; `g`/`y` are ignored to keep the
 matcher stateless.
