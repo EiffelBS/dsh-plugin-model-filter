@@ -25,6 +25,9 @@ name, model id, provider name, and provider id; an invalid pattern
 (e.g. `/[/`) shows a short "Invalid pattern" hint instead of silently
 matching nothing.
 
+As soon as the input starts with a `/`, a small **`regex` badge** appears next
+to the field to signal that the filter switched to regular-expression mode.
+
 Flags `i`, `m`, `s`, `u` are honored; `g`/`y` are ignored to keep the
 matcher stateless.
 
