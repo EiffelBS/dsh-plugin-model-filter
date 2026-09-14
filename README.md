@@ -7,6 +7,22 @@ instantly (`Search models…`) without touching the rest of the selection UX.
 
 ![Searchable model menu](assets/screenshot-model-menu.png)
 
+## Search syntax
+
+The filter box supports two modes:
+
+- **Plain text** — a case-insensitive substring match, exactly as before
+  (e.g. `deepseek v4`).
+- **Regular expression** — wrap the pattern in slashes:
+  `/deepseek-v4/` (any match), `/^gpt/i` (anchored, case-insensitive),
+  `/\d+/` (digit names). Flags `i`, `m`, `s`, `u` are honored; `g`/`y` are
+  ignored to keep the matcher stateless. The pattern applies to the model
+  name, model id, provider name, and provider id. An invalid pattern shows
+  a short "Invalid pattern" hint instead of matching nothing silently.
+  Text that merely contains slashes (e.g. a model id like
+  `deepseek-official/deepseek-v4`) still searches as plain text — only a
+  leading `/…/` pair selects the regex mode.
+
 It is the properly-named, distributable successor to the earlier profile-local
 name-shadowing fork (`@deepseek-ai/dsh-client-ui-model-selection` vendored copy).
 Instead of shadowing the shipped package name, this plugin is a real
