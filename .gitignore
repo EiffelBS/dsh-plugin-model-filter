@@ -1,3 +1,7 @@
 node_modules/
 *.log
 .DS_Store
+
+# Local audit workspace (profile copies, resolution probes, reports, contracts).
+# Working evidence only — never part of the deliverable or the public repo.
+audit/

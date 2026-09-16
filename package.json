@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-model-filter",
   "description": "Searchable model picker for the DSH chat composer — adds a search/filter box to the model selection menu.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
