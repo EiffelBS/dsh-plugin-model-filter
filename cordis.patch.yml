@@ -5,16 +5,17 @@
 # disabling it. The official package stays the single source of truth for the
 # `modelDirectories` service, the `/model` command and the `model` locale
 # namespace; this bundle only occupies the `conversation.input.model` seat
-# (rendered last, so it wins) with the searchable ModelSelect. Because this
-# bundle no longer provides the service other bundles depend on
-# (@nanmicoder/dsh-agent-teams waits for `modelDirectories`), disabling or
-# removing this plugin is safe — the stock row simply takes the seat back and
-# boot never loses the provider.
+# with the searchable ModelSelect. Because this bundle does not provide the
+# service other bundles may consume, disabling or removing it is safe: the
+# stock renderer takes the seat back and the native service provider remains
+# active. A DSH 0.1.5-era audit observed AgentTeams waiting for this service
+# when an earlier design disabled the stock provider; that is the historical
+# motivation for this ownership split.
 #
-# The insert row is the only edit. `applyEntryPatches` pushes insert lists at
-# the root after the shipped rows, so this row is activated last and its slot
-# registration (elected for `kind: single` seats by latest registration) wins
-# over the stock `ui-model-selection` slot.
+# The insert row is the only edit. Bundle order controls composition, not the
+# `kind: single` seat election. The client registers at priority -1 while the
+# stock row uses the default 0, so the registry's lowest-priority-wins rule
+# selects this renderer deterministically on every supported DSH version.
 - insert:
     - id: ui-model-filter
       name: 'dsh-plugin-model-filter'

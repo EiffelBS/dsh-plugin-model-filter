@@ -7,6 +7,11 @@ instantly (`Search models…`) without touching the rest of the selection UX.
 
 ![Searchable model menu](assets/screenshot-model-menu.png)
 
+> **Compatibility:** version 0.3.2 is verified against DSH `0.1.7-rc.2`
+> and retains the DSH `0.1.5-rc.2` icon and selection-result contracts. See
+> [DSH 0.1.7-rc.2 compatibility](docs/dsh-0.1.7-rc2.md) for the diagnosis and
+> isolated validation procedure.
+
 ## Search syntax
 
 The filter box supports two modes: plain text and regular expressions.
@@ -117,13 +122,16 @@ search) takes over automatically.
 | `/model` popup command | stock `ui-model-selection` |
 | `model` locale namespace dictionaries | stock `ui-model-selection` |
 | `conversation.input.model` seat rendering (with search) | this bundle |
-| search-only dictionary keys (`menu.searchPlaceholder`, `menu.clear`, `empty.noMatch`) | this bundle, in-render fallback (the stock dictionaries do not define them) |
+| search-only dictionary keys (`menu.filterPlaceholder`, `menu.clear`, `empty.noMatch`) | this bundle, in-render fallback (the stock dictionaries do not define them) |
 
 ## Requirements
 
 - DSH with the web profile (`@deepseek-ai/dsh-web-app` bundle).
+- Verified on DSH `0.1.7-rc.2`; the compatibility adapter also supports the
+  `0.1.5-rc.2` browser primitive names and model-selection result contract.
 - pnpm available on `PATH` (used by `dsh plugin`).
 - React / `@deepseek-ai/cordis` peer dependency (provided by the web bundle).
+- Node.js and npm only when running the repository compatibility tests.
 
 ## Install
 
@@ -141,8 +149,9 @@ dsh plugin --profile web add git+https://github.com/EiffelBS/dsh-plugin-model-fi
 
 `dsh plugin` runs `pnpm add` in the profile directory, then reconciles
 `dsh.profile.bundles`: because this package declares `dsh.bundle.patch`, it is
-auto-appended as a profile layer. Restart the web server (or open a fresh page
-session) for the bundle change to take effect.
+auto-appended as a profile layer. Restart the target web instance after an
+install, update, disable, or re-enable, then open a fresh browser session. A
+page refresh alone is not a substitute for restarting bundle composition.
 
 Verify installation:
 
@@ -150,7 +159,32 @@ Verify installation:
 dsh web --profile web --no-open   # then check the model menu includes the search box
 ```
 
+## Compatibility tests
+
+The tracked gate uses the exact DSH `0.1.7-rc.2` client contracts while also
+retaining the older browser API surface:
+
+```sh
+# Example with npm; pnpm works as well.
+npm install --no-package-lock
+npm test
+```
+
+The repository does not commit a package-manager lockfile; the exact DSH
+`0.1.7-rc.2` versions are pinned in `devDependencies`. The test verifies that
+the patch is exactly one inserted row, stock-shaped and plugin slot
+registrations coexist at priorities `0` and `-1`, disposal/remount removes only
+the plugin entry, both modern and legacy primitive-shaped module surfaces
+render, search preserves provider/model identity, and both legacy `void` and
+rc2 `RemoteResult` selection outcomes are handled. The target package
+declarations are dev-only pins; they are not runtime dependencies of the
+published plugin.
+
 ## Update
+
+Stop the target web instance before updating it. Package-manager reconciliation
+may replace parts of `node_modules`, and a live server can hold native packages
+open on Windows.
 
 After pulling a newer revision of this repository (or a published release):
 
@@ -158,7 +192,7 @@ After pulling a newer revision of this repository (or a published release):
 dsh plugin --profile web update dsh-plugin-model-filter
 ```
 
-then restart the web instance.
+then start the web instance again and use a fresh browser session.
 
 ## Uninstall / disable
 
@@ -172,18 +206,20 @@ Reconciliation removes the bundle from `dsh.profile.bundles`; the stock
 
 > Because the stock row is never disabled by this plugin, a profile-level
 > *disable* of the bundle row is also safe: `modelDirectories` stays provided
-> by the stock row and boot is unaffected (`@nanmicoder/dsh-agent-teams` keeps
-> activating). Only do not disable the *stock* `ui-model-selection` row in
-> addition to removing this plugin — that combination would leave the service
-> without a provider.
+> by the stock row, so consumers of that service keep their native provider.
+> Only do not disable the *stock* `ui-model-selection` row in addition to
+> removing this plugin; that combination would leave the service without a
+> provider.
 
 ## Layout
 
 ```
 package.json          name dsh-plugin-model-filter, dsh.bundle.patch, dsh.client
 cordis.patch.yml      inserts the client row (stock row left active)
-lib/index.js          host half (empty apply — pure UI plugin)
+lib/index.js          host half (empty apply - pure UI plugin)
 lib/client.js         browser half: search filter, ModelSelect on the slot
+test/compatibility.test.mjs  DSH rc2 contract and behavior gate
+docs/dsh-0.1.7-rc2.md      compatibility diagnosis and validation record
 ```
 
 ## Under the hood
@@ -195,10 +231,14 @@ lib/client.js         browser half: search filter, ModelSelect on the slot
   election while the stock package keeps providing the service, command, and
   dictionary keys.
 - Removing this bundle cannot starve `modelDirectories`: the provider is the
-  stock row, not this bundle. This fixes the boot failure seen in the
-  first-generation design, where disabling the plugin row left
-  `@nanmicoder/dsh-agent-teams` `pending (waiting for service:
-  modelDirectories)` and aborted web boot.
+  stock row, not this bundle. A DSH `0.1.5`-era audit of the first-generation
+  design observed `@nanmicoder/dsh-agent-teams` waiting for that service when
+  the stock provider had been disabled. This is historical motivation for the
+  ownership split, not a claim about every DSH `0.1.7` consumer.
+- DSH `0.1.5` completed a successful model selection with `void`; DSH
+  `0.1.7-rc.2` returns `RemoteResult<void>`. The injected face normalizes both
+  contracts so a resolved `{ ok: false }` is surfaced as a failure rather than
+  mistaken for success.
 
 ## Limitations
 
